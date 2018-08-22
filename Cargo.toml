@@ -1,0 +1,11 @@
+[package]
+name = "audio-clock"
+version = "0.1.0"
+authors = ["Paul Adenot <paul@paul.cx>"]
+description = "Propagate a musical clock from a real-time audio callback to other threads"
+repository = "https://github.com/padenot/audio-clock"
+license = "MIT/Apache-2.0"
+readme = "README.md"
+categories = ["multimedia::audio", "hardware-support"]
+
+[dependencies]
