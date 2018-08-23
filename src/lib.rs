@@ -6,7 +6,7 @@ pub struct ClockUpdater {
 }
 
 impl ClockUpdater {
-    fn increment(&mut self, frames: usize) {
+    pub fn increment(&mut self, frames: usize) {
         self.clock.store(self.clock.load(Ordering::Relaxed) + frames, Ordering::Release);
     }
 }
@@ -18,13 +18,13 @@ pub struct ClockConsumer {
 }
 
 impl ClockConsumer {
-    fn raw_frames(&self) -> usize {
+    pub fn raw_frames(&self) -> usize {
         self.clock.load(Ordering::Acquire)
     }
-    fn beat(&self) -> f32 {
+    pub fn beat(&self) -> f32 {
         self.tempo / 60. * (self.raw_frames() as f32 / self.rate as f32)
     }
-    fn beat_duration(&self) -> f32 {
+    pub fn beat_duration(&self) -> f32 {
         self.tempo / 60.
     }
 }

@@ -1,6 +1,6 @@
 [package]
 name = "audio-clock"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Paul Adenot <paul@paul.cx>"]
 description = "Propagate a musical clock from a real-time audio callback to other threads"
 repository = "https://github.com/padenot/audio-clock"
