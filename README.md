@@ -1,7 +1,7 @@
 # audio-clock
 
-<a href="https://crates.io/crates/monome-rs">
-    <img src="http://meritbadge.herokuapp.com/monome-rs" alt="crates.io">
+<a href="https://crates.io/crates/audio-clock">
+    <img src="http://meritbadge.herokuapp.com/audio-clock" alt="crates.io">
 </a>
 
 Propagate a musical clock from a real-time audio thread to other threads:
