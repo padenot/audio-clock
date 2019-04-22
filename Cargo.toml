@@ -9,3 +9,4 @@ readme = "README.md"
 categories = ["multimedia::audio", "hardware-support"]
 
 [dependencies]
+atomic="0.4"
