@@ -1,27 +1,29 @@
 extern crate atomic;
 
-use std::sync::Arc;
-use std::sync::atomic::{AtomicUsize, Ordering};
 use atomic::*;
-
-
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::Arc;
 
 struct InnerClock {
-    beat: Atomic<f32>, // w on audio thread, r+w on all thread
+    beat: Atomic<f32>,   // w on audio thread, r+w on all thread
     frames: AtomicUsize, // w on audio thread, r+w on all threads
-    tempo: Atomic<f32>, // r+w on audio thread, r on all threads
-    rate: u32 // const
+    tempo: Atomic<f32>,  // r+w on audio thread, r on all threads
+    rate: u32,           // const
 }
 
-
 pub struct ClockUpdater {
-    inner: Arc<InnerClock>
+    inner: Arc<InnerClock>,
 }
 
 impl ClockUpdater {
     pub fn increment(&mut self, frames: usize) {
         self.inner.frames.fetch_add(frames, Ordering::Release);
-        self.inner.beat.store(self.inner.beat.load(Ordering::Acquire) + self.inner.tempo.load(Ordering::Acquire) / 60. * frames as f32/ self.inner.rate as f32, Ordering::Release);
+        self.inner.beat.store(
+            self.inner.beat.load(Ordering::Acquire)
+                + self.inner.tempo.load(Ordering::Acquire) / 60. * frames as f32
+                    / self.inner.rate as f32,
+            Ordering::Release,
+        );
     }
     pub fn set_tempo(&mut self, new_tempo: f32) {
         self.inner.tempo.store(new_tempo, Ordering::Release);
@@ -29,7 +31,7 @@ impl ClockUpdater {
 }
 
 pub struct ClockConsumer {
-    inner: Arc<InnerClock>
+    inner: Arc<InnerClock>,
 }
 
 impl ClockConsumer {
@@ -47,7 +49,7 @@ impl ClockConsumer {
 impl Clone for ClockConsumer {
     fn clone(&self) -> ClockConsumer {
         ClockConsumer {
-            inner: self.inner.clone()
+            inner: self.inner.clone(),
         }
     }
 }
@@ -57,9 +59,12 @@ pub fn audio_clock(tempo: f32, rate: u32) -> (ClockUpdater, ClockConsumer) {
         beat: Atomic::new(0.),
         frames: AtomicUsize::new(0),
         tempo: Atomic::new(tempo),
-        rate
+        rate,
     });
-    (ClockUpdater { inner: c.clone() }, ClockConsumer { inner: c })
+    (
+        ClockUpdater { inner: c.clone() },
+        ClockConsumer { inner: c },
+    )
 }
 
 #[cfg(test)]
@@ -73,11 +78,17 @@ mod tests {
         updater.increment(128);
         assert_eq!(consumer.frames(), 128);
         assert_eq!(consumer.beat_duration(), 132.0 / 60.);
-        assert_eq!(consumer.beat(), consumer.beat_duration() * (consumer.frames() as f32 / 44100. ));
+        assert_eq!(
+            consumer.beat(),
+            consumer.beat_duration() * (consumer.frames() as f32 / 44100.)
+        );
         updater.increment(64);
         assert_eq!(consumer.frames(), 128 + 64);
         assert_eq!(consumer.beat_duration(), 132.0 / 60.);
-        assert_eq!(consumer.beat(), consumer.beat_duration() * (consumer.frames() as f32 / 44100. ));
+        assert_eq!(
+            consumer.beat(),
+            consumer.beat_duration() * (consumer.frames() as f32 / 44100.)
+        );
         let second_consumer = consumer.clone();
         updater.increment(64);
         assert_eq!(consumer.frames(), 128 + 64 + 64);
@@ -96,7 +107,9 @@ mod tests {
         assert_eq!(consumer.beat(), second_consumer.beat());
         match thread::spawn(move || {
             updater.increment(128);
-        }).join() {
+        })
+        .join()
+        {
             Ok(_) => {
                 assert_eq!(consumer.frames(), 128 + 64 + 64 + 64 + 128);
                 assert_eq!(consumer.frames(), second_consumer.frames());
